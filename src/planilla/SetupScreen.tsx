@@ -210,6 +210,7 @@ export function SetupScreen({ match, onContinue }: Props) {
                   {teamsInCategory.map((team) => (
                     <option key={team.id} value={team.id} disabled={rosters[side === "A" ? "B" : "A"]?.catalogTeamId === team.id}>
                       {team.name}
+                      {team.players.length === 0 ? " (sin jugadores)" : ""}
                     </option>
                   ))}
                 </select>
@@ -250,7 +251,16 @@ export function SetupScreen({ match, onContinue }: Props) {
 
           {roster ? (
             <>
-              <p className="pl-muted">Poné el número de camiseta de los que juegan. Sin número = no juega.</p>
+              {roster.players.length === 0 ? (
+                // Cuadros cargados sin jugadores (ej. Sarandi Mayores / Sub 20,
+                // 26/10/2026): todavia no estan en juez. Para este partido se
+                // agregan a mano abajo.
+                <p className="pl-warning">
+                  Faltan ingresar los jugadores de {roster.name}: todavía no están cargados. Para este partido agregalos abajo con número y nombre.
+                </p>
+              ) : (
+                <p className="pl-muted">Poné el número de camiseta de los que juegan. Sin número = no juega.</p>
+              )}
               <ul className="pl-player-list">
                 {roster.players.map((player) => (
                   <li key={player.key} className={`${player.libero ? "is-libero" : ""} ${player.numberInput === "" ? "is-out" : ""}`}>

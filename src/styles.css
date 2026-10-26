@@ -713,3 +713,15 @@ button:disabled {
 .pl-player-list .pl-player-name {
   color: var(--text);
 }
+
+/* Aviso de cuadro sin jugadores cargados (26/10/2026). */
+.pl-warning {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
