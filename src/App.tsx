@@ -31,9 +31,10 @@ export function App() {
 
   function resetMatch() {
     clearSaved();
-    // Se conservan los equipos y jugadores: lo normal es volver a jugar con
-    // los mismos o cambiar solo algunos.
-    setState({ match: { ...newMatch(), teams: match.teams, category: match.category }, history: [] });
+    // Todo de cero (pedido explicito 26/10/2026): categoria, cuadros,
+    // jugadores y saque se eligen de nuevo. Los numeros de camiseta que el
+    // celular recuerda por jugador (catalog.ts) se mantienen.
+    setState({ match: newMatch(), history: [] });
   }
 
   if (match.phase === "setup") {
