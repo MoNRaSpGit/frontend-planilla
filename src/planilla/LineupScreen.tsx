@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { saveRemembered } from "./catalog";
+import { ArrivalForm } from "./ArrivalForm";
 import { decidingSetNumber, defaultFirstServe, POSITION_LABELS, startSet } from "./rules";
 import type { Match, Rotation, Side } from "./types";
 
@@ -33,10 +33,6 @@ export function LineupScreen({ match, onStart, onBack, onUpdate }: Props) {
   });
   const [firstServe, setFirstServe] = useState<Side>(defaultFirstServe(match, setNumber));
   const [error, setError] = useState("");
-  const [arrival, setArrival] = useState<Record<Side, { key: string; number: string; libero: boolean }>>({
-    A: { key: "", number: "", libero: false },
-    B: { key: "", number: "", libero: false }
-  });
   const isDeciding = setNumber === decidingSetNumber(match);
 
   function setSlot(side: Side, index: number, value: number | null) {
@@ -48,34 +44,6 @@ export function LineupScreen({ match, onStart, onBack, onUpdate }: Props) {
       next[index] = value;
       return { ...current, [side]: next };
     });
-  }
-
-  // Jugador que llego tarde (pedido explicito 26/10/2026: "capaz que llega
-  // para el segundo set y ahi lo agregas, pero siempre del cuadro").
-  function addArrival(side: Side) {
-    const info = match.teams[side];
-    const entry = arrival[side];
-    const reserve = (info.reserves ?? []).find((candidate) => candidate.key === entry.key);
-    if (!reserve) return setError(`Elegí el jugador de ${info.name} que llegó.`);
-    const number = Number(entry.number);
-    if (entry.number === "") return setError(`Poné el número de ${reserve.name}.`);
-    if (info.players.some((player) => player.number === number)) return setError(`En ${info.name} ya está el #${number}.`);
-    if (entry.libero && info.liberos.length >= 2) return setError(`${info.name} ya tiene 2 líberos.`);
-    setError("");
-    saveRemembered({ [reserve.key]: { number, libero: entry.libero } });
-    onUpdate({
-      ...match,
-      teams: {
-        ...match.teams,
-        [side]: {
-          ...info,
-          players: [...info.players, { number, name: reserve.name, key: reserve.key }].sort((a, b) => a.number - b.number),
-          liberos: entry.libero ? [...info.liberos, number] : info.liberos,
-          reserves: (info.reserves ?? []).filter((candidate) => candidate.key !== reserve.key)
-        }
-      }
-    });
-    setArrival((current) => ({ ...current, [side]: { key: "", number: "", libero: false } }));
   }
 
   function handleStart() {
@@ -143,46 +111,7 @@ export function LineupScreen({ match, onStart, onBack, onUpdate }: Props) {
               ))}
             </div>
 
-            {(info.reserves ?? []).length > 0 && (
-              <div className="pl-arrival">
-                <p className="pl-label">¿Llegó alguien de {info.name}?</p>
-                <div className="pl-arrival-row">
-                  <select
-                    value={arrival[side].key}
-                    onChange={(event) => setArrival((current) => ({ ...current, [side]: { ...current[side], key: event.target.value } }))}
-                  >
-                    <option value="">Elegir jugador…</option>
-                    {(info.reserves ?? []).map((reserve) => (
-                      <option key={reserve.key} value={reserve.key}>
-                        {reserve.name}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    className="pl-input-number"
-                    value={arrival[side].number}
-                    onChange={(event) =>
-                      setArrival((current) => ({ ...current, [side]: { ...current[side], number: event.target.value.replace(/D/g, "").slice(0, 2) } }))
-                    }
-                    inputMode="numeric"
-                    placeholder="N.º"
-                    aria-label="Número"
-                  />
-                </div>
-                <div className="pl-arrival-row">
-                  <button
-                    type="button"
-                    className={`pl-chip ${arrival[side].libero ? "is-on" : ""}`}
-                    onClick={() => setArrival((current) => ({ ...current, [side]: { ...current[side], libero: !current[side].libero } }))}
-                  >
-                    Líbero
-                  </button>
-                  <button type="button" className="pl-button" onClick={() => addArrival(side)}>
-                    Agregar a la planilla
-                  </button>
-                </div>
-              </div>
-            )}
+            {(info.catalogTeamId != null || (info.reserves ?? []).length > 0) && <ArrivalForm match={match} side={side} onAdd={onUpdate} />}
           </section>
         );
       })}

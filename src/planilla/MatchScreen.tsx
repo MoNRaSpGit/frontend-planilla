@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ArrivalForm } from "./ArrivalForm";
 import { COURT_ORDER } from "./LineupScreen";
 import {
   checkSubstitution,
@@ -119,6 +120,7 @@ export function MatchScreen({ match, canUndo, onChange, onUndo, onNextSet, onNew
           match={match}
           side={dialog.side}
           onClose={() => setDialog(null)}
+          onAddPlayer={onChange}
           onConfirm={(out, entering) => {
             onChange(substitute(match, dialog.side, out, entering));
             setDialog(null);
@@ -244,11 +246,13 @@ function SubstitutionDialog({
   match,
   side,
   onClose,
+  onAddPlayer,
   onConfirm
 }: {
   match: Match;
   side: Side;
   onClose: () => void;
+  onAddPlayer: (match: Match) => void;
   onConfirm: (out: number, entering: number) => void;
 }) {
   const set = currentSet(match)!;
@@ -310,6 +314,7 @@ function SubstitutionDialog({
             )}
           </>
         )}
+        {(info.catalogTeamId != null || (info.reserves ?? []).length > 0) && <ArrivalForm match={match} side={side} onAdd={onAddPlayer} />}
         <div className="pl-modal-actions">
           <button type="button" className="pl-button" onClick={onClose}>
             Cancelar

@@ -13,6 +13,18 @@ export async function fetchCatalog(): Promise<CatalogTeam[]> {
   return data.teams;
 }
 
+// Una sola descarga por sesion (la usan Datos y "Llego alguien?").
+let catalogPromise: Promise<CatalogTeam[]> | null = null;
+export function getCatalogCached(): Promise<CatalogTeam[]> {
+  if (!catalogPromise) {
+    catalogPromise = fetchCatalog().catch((error) => {
+      catalogPromise = null;
+      throw error;
+    });
+  }
+  return catalogPromise;
+}
+
 export function playerFullName(player: CatalogPlayer) {
   return `${player.firstName} ${player.lastName}`.trim();
 }

@@ -222,6 +222,36 @@ export function timeout(match: Match, side: Side): Match {
   return addLog(next, "timeout", side, `Tiempo ${teamName(match, side)} (${nextTeam.timeoutsUsed}/2)`);
 }
 
+// Suma a la planilla un jugador del cuadro que llego tarde (de las
+// reservas). Devuelve el texto del error si no se puede.
+export function addReservePlayer(
+  match: Match,
+  side: Side,
+  reserve: { key: string; name: string },
+  number: number,
+  libero: boolean
+): Match | string {
+  const info = match.teams[side];
+  const key = reserve.key;
+  if (info.players.some((player) => player.key === key)) return `${reserve.name} ya está en la planilla.`;
+  if (!Number.isInteger(number) || number < 0 || number > 99) return "Número inválido.";
+  if (info.players.some((player) => player.number === number)) return `En ${info.name} ya está el #${number}.`;
+  if (libero && info.liberos.length >= 2) return `${info.name} ya tiene 2 líberos.`;
+  const next: Match = {
+    ...match,
+    teams: {
+      ...match.teams,
+      [side]: {
+        ...info,
+        players: [...info.players, { number, name: reserve.name, key }].sort((a, b) => a.number - b.number),
+        liberos: libero ? [...info.liberos, number] : info.liberos,
+        reserves: (info.reserves ?? []).filter((candidate) => candidate.key !== key)
+      }
+    }
+  };
+  return currentSet(match) ? addLog(next, "sub", side, `Se suma a ${info.name}: #${number} ${reserve.name}${libero ? " (líbero)" : ""}`) : next;
+}
+
 export function newMatch(): Match {
   return {
     teams: {
