@@ -67,6 +67,9 @@ export function SetupScreen({ match, onContinue }: Props) {
   const [extraNumber, setExtraNumber] = useState("");
   const [extraName, setExtraName] = useState("");
   const [error, setError] = useState("");
+  // Equipos sin libero marcado al tocar "Siguiente" (pedido explicito
+  // 26/10/2026: avisar antes de seguir, con modal propio).
+  const [missingLibero, setMissingLibero] = useState<Side[] | null>(null);
 
   function loadCatalog() {
     setLoadError("");
@@ -138,7 +141,7 @@ export function SetupScreen({ match, onContinue }: Props) {
     };
   }
 
-  function handleContinue() {
+  function handleContinue(skipLiberoCheck = false) {
     if (rosters.A && rosters.B && rosters.A.catalogTeamId !== null && rosters.A.catalogTeamId === rosters.B.catalogTeamId) {
       setError("Local y Visitante no pueden ser el mismo cuadro.");
       return;
@@ -147,6 +150,13 @@ export function SetupScreen({ match, onContinue }: Props) {
     if (typeof teamA === "string") return setError(teamA);
     const teamB = buildTeam("B");
     if (typeof teamB === "string") return setError(teamB);
+
+    const withoutLibero = (["A", "B"] as Side[]).filter((side) => (side === "A" ? teamA : teamB).liberos.length === 0);
+    if (!skipLiberoCheck && withoutLibero.length > 0) {
+      setError("");
+      setMissingLibero(withoutLibero);
+      return;
+    }
 
     // Se recuerdan numero y libero de los jugadores del catalogo.
     const memory: Record<string, RememberedPlayer> = {};
@@ -313,7 +323,41 @@ export function SetupScreen({ match, onContinue }: Props) {
 
       {error && <p className="pl-error">{error}</p>}
 
-      <button type="button" className="pl-button pl-button--primary pl-button--block" onClick={handleContinue}>
+      {missingLibero && (
+        <div className="pl-overlay">
+          <div className="pl-modal" role="alertdialog" aria-modal="true">
+            <h2>No marcaste líbero</h2>
+            <p className="pl-muted">
+              {missingLibero.map((side) => rosters[side]?.name ?? SIDE_LABELS[side]).join(" y ")}{" "}
+              {missingLibero.length === 1 ? "no tiene" : "no tienen"} ningún líbero seleccionado. ¿Seguimos así o lo marcás?
+            </p>
+            <div className="pl-modal-actions">
+              <button
+                type="button"
+                className="pl-button"
+                onClick={() => {
+                  setEditing(missingLibero[0]);
+                  setMissingLibero(null);
+                }}
+              >
+                Marcar líbero
+              </button>
+              <button
+                type="button"
+                className="pl-button pl-button--primary"
+                onClick={() => {
+                  setMissingLibero(null);
+                  handleContinue(true);
+                }}
+              >
+                Continuar sin líbero
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <button type="button" className="pl-button pl-button--primary pl-button--block" onClick={() => handleContinue()}>
         Siguiente: formación del set 1
       </button>
     </main>
