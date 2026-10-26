@@ -2,7 +2,7 @@
 // apenas se instala (skipWaiting + clients.claim) y sirve las navegaciones
 // network-first, asi un reload siempre trae el shell mas nuevo si hay
 // conexion -- y si no hay conexion, cae al shell cacheado.
-const SHELL_CACHE = "planilla-shell-v1";
+const SHELL_CACHE = "planilla-shell-v2";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
