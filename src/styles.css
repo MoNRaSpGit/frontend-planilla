@@ -725,3 +725,114 @@ button:disabled {
   font-size: 0.9rem;
   font-weight: 600;
 }
+
+/* Jugador que llega tarde (entre sets, 26/10/2026). */
+.pl-arrival {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+
+.pl-arrival-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pl-arrival-row select {
+  flex: 1;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.pl-arrival-row .pl-input-number {
+  width: 64px;
+  padding: 10px 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 800;
+}
+
+/* Aviso de actualizacion (misma dinamica que frontend-distribuidora,
+   26/10/2026). */
+.update-banner {
+  position: fixed;
+  left: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: min(390px, calc(100vw - 32px));
+  padding: 10px 10px 10px 16px;
+  background: var(--surface);
+  border: 2px solid var(--primary);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2);
+  animation: update-banner-in 0.35s ease-out;
+}
+
+@keyframes update-banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+.update-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #0f172a;
+  color: #fff;
+}
+
+.update-overlay-card {
+  width: min(380px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.update-overlay-card img {
+  width: 96px;
+  height: 96px;
+  border-radius: 22px;
+}
+
+.update-overlay-card strong {
+  font-size: 20px;
+}
+
+.update-overlay-card span {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.update-progress {
+  width: 100%;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.update-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #facc15;
+  transition: width 0.08s linear;
+}

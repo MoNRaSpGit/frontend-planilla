@@ -4,7 +4,8 @@
 
 export type Side = "A" | "B";
 
-export type Player = { number: number; name: string };
+// key = jugador del catalogo ("c<id>"): sirve para recordar su numero.
+export type Player = { number: number; name: string; key?: string };
 
 export type TeamInfo = {
   name: string;
@@ -13,6 +14,10 @@ export type TeamInfo = {
   players: Player[];
   // Numeros de los liberos (hasta 2), tambien estan en players.
   liberos: number[];
+  // Jugadores del cuadro que no se anotaron (sin numero): si llegan tarde
+  // se suman entre sets eligiendolos de aca (pedido explicito 26/10/2026:
+  // "siempre del cuadro, nunca uno inventado").
+  reserves?: { key: string; name: string }[];
 };
 
 // Los 6 de la formacion OFICIAL en cancha: indice 0 = posicion I (el que

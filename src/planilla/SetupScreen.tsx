@@ -39,12 +39,15 @@ function rosterFromMatch(team: TeamInfo): Roster {
   return {
     catalogTeamId: team.catalogTeamId ?? null,
     name: team.name,
-    players: team.players.map((player, index) => ({
-      key: `m${index}-${player.number}`,
-      name: player.name,
-      numberInput: String(player.number),
-      libero: team.liberos.includes(player.number)
-    }))
+    players: [
+      ...team.players.map((player, index) => ({
+        key: player.key ?? `m${index}-${player.number}`,
+        name: player.name,
+        numberInput: String(player.number),
+        libero: team.liberos.includes(player.number)
+      })),
+      ...(team.reserves ?? []).map((reserve) => ({ key: reserve.key, name: reserve.name, numberInput: "", libero: false }))
+    ].sort((a, b) => a.name.localeCompare(b.name, "es"))
   };
 }
 
@@ -64,8 +67,6 @@ export function SetupScreen({ match, onContinue }: Props) {
   });
   const [firstServe, setFirstServe] = useState<Side>(match.firstServeSet1);
   const [editing, setEditing] = useState<Side>("A");
-  const [extraNumber, setExtraNumber] = useState("");
-  const [extraName, setExtraName] = useState("");
   const [error, setError] = useState("");
   // Equipos sin libero marcado al tocar "Siguiente" (pedido explicito
   // 26/10/2026: avisar antes de seguir, con modal propio).
@@ -109,20 +110,6 @@ export function SetupScreen({ match, onContinue }: Props) {
     });
   }
 
-  function addExtraPlayer() {
-    const roster = rosters[editing];
-    if (!roster) return;
-    if (!extraNumber) {
-      setError("Poné el número del jugador que agregás.");
-      return;
-    }
-    const player: RosterPlayer = { key: `m${Date.now()}`, name: extraName.trim() || "Jugador", numberInput: extraNumber, libero: false };
-    setRosters((current) => ({ ...current, [editing]: { ...roster, players: [...roster.players, player] } }));
-    setExtraNumber("");
-    setExtraName("");
-    setError("");
-  }
-
   function buildTeam(side: Side): TeamInfo | string {
     const roster = rosters[side];
     if (!roster) return `Elegí el cuadro ${SIDE_LABELS[side]}.`;
@@ -136,8 +123,11 @@ export function SetupScreen({ match, onContinue }: Props) {
     return {
       name: roster.name,
       catalogTeamId: roster.catalogTeamId,
-      players: playing.map((player) => ({ number: Number(player.numberInput), name: player.name })).sort((a, b) => a.number - b.number),
-      liberos
+      players: playing
+        .map((player) => ({ number: Number(player.numberInput), name: player.name, key: player.key }))
+        .sort((a, b) => a.number - b.number),
+      liberos,
+      reserves: roster.players.filter((player) => player.numberInput === "").map((player) => ({ key: player.key, name: player.name }))
     };
   }
 
@@ -266,7 +256,7 @@ export function SetupScreen({ match, onContinue }: Props) {
                 // 26/10/2026): todavia no estan en juez. Para este partido se
                 // agregan a mano abajo.
                 <p className="pl-warning">
-                  Faltan ingresar los jugadores de {roster.name}: todavía no están cargados. Para este partido agregalos abajo con número y nombre.
+                  Faltan ingresar los jugadores de {roster.name}: todavía no están cargados, así que por ahora no se puede armar la planilla con este cuadro.
                 </p>
               ) : (
                 <p className="pl-muted">Poné el número de camiseta de los que juegan. Sin número = no juega.</p>
@@ -294,26 +284,6 @@ export function SetupScreen({ match, onContinue }: Props) {
                 ))}
               </ul>
 
-              <form
-                className="pl-add-player"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  addExtraPlayer();
-                }}
-              >
-                <input
-                  className="pl-input-number"
-                  value={extraNumber}
-                  onChange={(event) => setExtraNumber(event.target.value.replace(/\D/g, "").slice(0, 2))}
-                  inputMode="numeric"
-                  placeholder="N.º"
-                  aria-label="Número"
-                />
-                <input value={extraName} onChange={(event) => setExtraName(event.target.value)} placeholder="Otro jugador (nombre)" aria-label="Nombre" />
-                <button type="submit" className="pl-button">
-                  Agregar
-                </button>
-              </form>
             </>
           ) : (
             <p className="pl-muted">Elegí el cuadro {SIDE_LABELS[editing]} arriba.</p>

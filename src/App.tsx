@@ -41,7 +41,14 @@ export function App() {
   }
 
   if (match.phase === "lineup") {
-    return <LineupScreen match={match} onStart={change} onBack={match.sets.length === 0 ? () => change({ ...match, phase: "setup" }) : null} />;
+    return (
+      <LineupScreen
+        match={match}
+        onStart={change}
+        onUpdate={change}
+        onBack={match.sets.length === 0 ? () => change({ ...match, phase: "setup" }) : null}
+      />
+    );
   }
 
   return (
