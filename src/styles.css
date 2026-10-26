@@ -794,7 +794,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: #0f172a;
+  background: #000;
   color: #fff;
 }
 
@@ -807,10 +807,12 @@ button:disabled {
   text-align: center;
 }
 
+/* Logo de Logic Lab (LogoFoto.png, vertical con borde amarillo). */
 .update-overlay-card img {
-  width: 96px;
-  height: 96px;
-  border-radius: 22px;
+  width: auto;
+  height: min(52vh, 420px);
+  max-width: 100%;
+  border-radius: 12px;
 }
 
 .update-overlay-card strong {
@@ -835,4 +837,25 @@ button:disabled {
   border-radius: 999px;
   background: #facc15;
   transition: width 0.08s linear;
+}
+
+/* Video de inicio de Logic Lab (26/10/2026): tapa la app mientras carga. */
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: #000;
+  transition: opacity 0.35s ease;
+}
+
+.splash.is-fading {
+  opacity: 0;
+}
+
+.splash video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }

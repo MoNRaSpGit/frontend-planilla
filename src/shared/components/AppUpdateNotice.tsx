@@ -102,7 +102,7 @@ export function AppUpdateNotice() {
     return (
       <div className="update-overlay" role="status" aria-live="polite">
         <div className="update-overlay-card">
-          <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" />
+          <img src={`${import.meta.env.BASE_URL}LogoFoto.png`} alt="Logic Lab" />
           <strong>{progress < 100 ? "Actualizando la aplicación…" : "¡Listo!"}</strong>
           <div
             className="update-progress"

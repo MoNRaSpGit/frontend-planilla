@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { AppUpdateNotice } from "./shared/components/AppUpdateNotice";
+import { SplashVideo } from "./shared/components/SplashVideo";
 import "./styles.css";
 
 // PWA solo en produccion (mismo criterio que frontend-distribuidora).
@@ -15,5 +16,6 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
     <AppUpdateNotice />
+    <SplashVideo />
   </StrictMode>
 );
