@@ -65,7 +65,9 @@ export function SetupScreen({ match, onContinue }: Props) {
     A: match.teams.A.name ? rosterFromMatch(match.teams.A) : null,
     B: match.teams.B.name ? rosterFromMatch(match.teams.B) : null
   });
-  const [firstServe, setFirstServe] = useState<Side>(match.firstServeSet1);
+  // Quien saca arranca SIN elegir en un partido nuevo (pedido explicito
+  // 26/10/2026: "hay que marcarlo"); si se vuelve atras se conserva.
+  const [firstServe, setFirstServe] = useState<Side | null>(match.teams.A.name ? match.firstServeSet1 : null);
   const [editing, setEditing] = useState<Side>("A");
   const [error, setError] = useState("");
   // Equipos sin libero marcado al tocar "Siguiente" (pedido explicito
@@ -140,6 +142,7 @@ export function SetupScreen({ match, onContinue }: Props) {
     if (typeof teamA === "string") return setError(teamA);
     const teamB = buildTeam("B");
     if (typeof teamB === "string") return setError(teamB);
+    if (!firstServe) return setError("Marcá qué equipo saca primero.");
 
     const withoutLibero = (["A", "B"] as Side[]).filter((side) => (side === "A" ? teamA : teamB).liberos.length === 0);
     if (!skipLiberoCheck && withoutLibero.length > 0) {
