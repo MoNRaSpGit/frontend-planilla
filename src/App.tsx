@@ -33,7 +33,7 @@ export function App() {
     clearSaved();
     // Se conservan los equipos y jugadores: lo normal es volver a jugar con
     // los mismos o cambiar solo algunos.
-    setState({ match: { ...newMatch(), teams: match.teams, setsToWin: match.setsToWin }, history: [] });
+    setState({ match: { ...newMatch(), teams: match.teams, category: match.category }, history: [] });
   }
 
   if (match.phase === "setup") {

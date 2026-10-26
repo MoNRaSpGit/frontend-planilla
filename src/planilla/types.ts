@@ -8,6 +8,8 @@ export type Player = { number: number; name: string };
 
 export type TeamInfo = {
   name: string;
+  // Cuadro elegido del catalogo (copiado de juez); null = cargado a mano.
+  catalogTeamId: number | null;
   players: Player[];
   // Numeros de los liberos (hasta 2), tambien estan en players.
   liberos: number[];
@@ -55,8 +57,10 @@ export type Phase = "setup" | "lineup" | "playing" | "set_over" | "finished";
 
 export type Match = {
   teams: Record<Side, TeamInfo>;
-  // Sets para ganar: 3 (a 5 sets) o 2 (a 3 sets).
+  // Sets para ganar. Desde 26/10/2026 siempre 2 (partido a 3 sets: 25,
+  // 25 y el tercero a 15); el tipo admite 3 por partidos guardados antes.
   setsToWin: 2 | 3;
+  category: { sex: "masculino" | "femenino"; division: "A" | "B" } | null;
   firstServeSet1: Side;
   sets: SetState[];
   setsWon: Record<Side, number>;

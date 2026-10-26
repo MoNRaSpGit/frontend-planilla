@@ -225,10 +225,11 @@ export function timeout(match: Match, side: Side): Match {
 export function newMatch(): Match {
   return {
     teams: {
-      A: { name: "Local", players: [], liberos: [] },
-      B: { name: "Visitante", players: [], liberos: [] }
+      A: { name: "", catalogTeamId: null, players: [], liberos: [] },
+      B: { name: "", catalogTeamId: null, players: [], liberos: [] }
     },
-    setsToWin: 3,
+    setsToWin: 2,
+    category: null,
     firstServeSet1: "A",
     sets: [],
     setsWon: { A: 0, B: 0 },

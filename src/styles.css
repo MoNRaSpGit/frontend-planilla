@@ -680,3 +680,36 @@ button:disabled {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* Datos con cuadros del catalogo (26/10/2026). */
+.pl-field select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 1rem;
+}
+
+.pl-player-list li.is-out {
+  opacity: 0.55;
+}
+
+.pl-player-list .pl-input-number {
+  width: 52px;
+  padding: 8px 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.pl-player-list li {
+  grid-template-columns: 56px 1fr auto;
+}
+
+.pl-player-list .pl-player-name {
+  color: var(--text);
+}
