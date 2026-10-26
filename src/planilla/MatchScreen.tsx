@@ -24,7 +24,14 @@ type Props = {
   onNewMatch: () => void;
 };
 
-type Dialog = { kind: "sub" | "libero"; side: Side } | { kind: "log" } | { kind: "new" } | null;
+type Dialog =
+  | { kind: "sub" | "libero"; side: Side }
+  | { kind: "log" }
+  | { kind: "new" }
+  // Equipos con libero cargado que no lo hicieron entrar, y el tanto que
+  // se estaba por anotar (pedido explicito 26/10/2026).
+  | { kind: "no_libero"; sides: Side[]; pointFor: Side }
+  | null;
 
 // Pantalla del partido (pedido explicito): dividida a la mitad, un equipo
 // de cada lado, cada uno con su marcador, su cancha (quien saca) y los
@@ -32,9 +39,28 @@ type Dialog = { kind: "sub" | "libero"; side: Side } | { kind: "log" } | { kind:
 // tantos; saque y rotacion los calcula rules.ts.
 export function MatchScreen({ match, canUndo, onChange, onUndo, onNextSet, onNewMatch }: Props) {
   const [dialog, setDialog] = useState<Dialog>(null);
+  // Sets en los que ya se aviso lo del libero (una sola vez por set).
+  const [liberoWarnedSets, setLiberoWarnedSets] = useState<number[]>([]);
   const set = currentSet(match);
   if (!set) return null;
   const finished = match.phase === "finished";
+
+  // Antes del primer tanto del set: si un equipo tiene libero cargado y
+  // no lo hizo entrar, se avisa ("a veces me olvido de marcar el libero").
+  function handlePoint(side: Side) {
+    const currentSetState = currentSet(match)!;
+    const isFirstPoint = currentSetState.score.A + currentSetState.score.B === 0;
+    if (isFirstPoint && !liberoWarnedSets.includes(currentSetState.number)) {
+      const sides = (["A", "B"] as Side[]).filter(
+        (entry) => match.teams[entry].liberos.length > 0 && !currentSetState.teams[entry].liberoOn
+      );
+      if (sides.length > 0) {
+        setDialog({ kind: "no_libero", sides, pointFor: side });
+        return;
+      }
+    }
+    onChange(scorePoint(match, side));
+  }
   const setOver = match.phase === "set_over";
 
   return (
@@ -61,7 +87,7 @@ export function MatchScreen({ match, canUndo, onChange, onUndo, onNextSet, onNew
             match={match}
             side={side}
             disabled={match.phase !== "playing"}
-            onPoint={() => onChange(scorePoint(match, side))}
+            onPoint={() => handlePoint(side)}
             onSub={() => setDialog({ kind: "sub", side })}
             onLibero={() => setDialog({ kind: "libero", side })}
             onTimeout={() => onChange(timeout(match, side))}
@@ -127,6 +153,34 @@ export function MatchScreen({ match, canUndo, onChange, onUndo, onNextSet, onNew
           }}
         />
       )}
+      {dialog?.kind === "no_libero" && (
+        <div className="pl-overlay">
+          <div className="pl-modal" role="alertdialog" aria-modal="true">
+            <h2>Falta marcar el líbero</h2>
+            <p className="pl-muted">
+              {dialog.sides.map((entry) => match.teams[entry].name).join(" y ")} {dialog.sides.length === 1 ? "tiene" : "tienen"} líbero y no
+              marcaste por quién entra.
+            </p>
+            <div className="pl-modal-actions">
+              <button type="button" className="pl-button" onClick={() => setDialog({ kind: "libero", side: dialog.sides[0] })}>
+                Marcar líbero
+              </button>
+              <button
+                type="button"
+                className="pl-button pl-button--primary"
+                onClick={() => {
+                  setLiberoWarnedSets((current) => [...current, set.number]);
+                  setDialog(null);
+                  onChange(scorePoint(match, dialog.pointFor));
+                }}
+              >
+                Seguir sin líbero
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {dialog?.kind === "libero" && (
         <LiberoDialog
           match={match}
