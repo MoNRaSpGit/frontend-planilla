@@ -45,9 +45,14 @@ export type SetState = {
   startingLineups: Record<Side, Rotation>;
   teams: Record<Side, TeamSetState>;
   winner: Side | null;
+  // Hora de inicio y de fin del set (la planilla oficial las pide).
+  startedAt?: string;
+  endedAt?: string;
+  // Set decisivo: ya se hizo el cambio de cancha al llegar a 8.
+  courtChanged?: boolean;
 };
 
-export type LogKind = "point" | "sub" | "libero_in" | "libero_out" | "timeout" | "set_start" | "set_end";
+export type LogKind = "point" | "sub" | "libero_in" | "libero_out" | "timeout" | "set_start" | "set_end" | "sanction" | "court_change";
 
 export type LogEntry = {
   id: number;
@@ -60,7 +65,23 @@ export type LogEntry = {
 
 export type Phase = "setup" | "lineup" | "playing" | "set_over" | "finished";
 
+// Datos de la cabecera de la planilla (todos opcionales).
+export type MatchInfo = {
+  date: string;
+  time: string;
+  place: string;
+  referee1: string;
+  referee2: string;
+  captainA: string;
+  captainB: string;
+  coachA: string;
+  coachB: string;
+};
+
 export type Match = {
+  info?: MatchInfo;
+  // Observaciones / protesta, texto libre.
+  notes?: string;
   teams: Record<Side, TeamInfo>;
   // Sets para ganar. Desde 26/10/2026 siempre 2 (partido a 3 sets: 25,
   // 25 y el tercero a 15); el tipo admite 3 por partidos guardados antes.

@@ -20,6 +20,8 @@ export type LeagueResult = {
   date: string;
   // true = de ejemplo (generado al azar), false = jugado en la planilla.
   demo: boolean;
+  // Solo en los jugados: firma del partido (para sacarlo si se vuelve atras).
+  signature?: string;
 };
 
 export type LeagueData = {
@@ -163,7 +165,7 @@ export function matchSignature(match: Match): string | null {
   return `${a}-${b}-${match.nextLogId}-${match.sets.map((set) => `${set.score.A}:${set.score.B}`).join(",")}`;
 }
 
-export function resultFromMatch(match: Match, id: number): LeagueResult | null {
+export function resultFromMatch(match: Match, id: number, signature?: string): LeagueResult | null {
   const a = match.teams.A.catalogTeamId;
   const b = match.teams.B.catalogTeamId;
   if (a == null || b == null || !match.category) return null;
@@ -175,7 +177,8 @@ export function resultFromMatch(match: Match, id: number): LeagueResult | null {
     awayId: b,
     sets: match.sets.map((set) => [set.score.A, set.score.B] as [number, number]),
     date: todayKey(),
-    demo: false
+    demo: false,
+    signature
   };
 }
 

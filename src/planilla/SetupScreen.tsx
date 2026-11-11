@@ -9,7 +9,14 @@ import {
   type CatalogTeam,
   type RememberedPlayer
 } from "./catalog";
-import type { Match, Side, TeamInfo } from "./types";
+import type { Match, MatchInfo, Side, TeamInfo } from "./types";
+
+function todayKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+const EMPTY_INFO: MatchInfo = { date: "", time: "", place: "", referee1: "", referee2: "", captainA: "", captainB: "", coachA: "", coachB: "" };
 
 type Props = {
   match: Match;
@@ -69,6 +76,12 @@ export function SetupScreen({ match, onContinue }: Props) {
   // 26/10/2026: "hay que marcarlo"); si se vuelve atras se conserva.
   const [firstServe, setFirstServe] = useState<Side | null>(match.teams.A.name ? match.firstServeSet1 : null);
   const [editing, setEditing] = useState<Side>("A");
+  // Cabecera de la planilla (11/11/2026): fecha, hora, lugar, arbitros,
+  // capitanes y entrenadores. Todo opcional; la fecha arranca en hoy.
+  const [info, setInfo] = useState<MatchInfo>(() => ({ ...EMPTY_INFO, date: todayKey(), ...(match.info ?? {}) }));
+  function setInfoField(field: keyof MatchInfo, value: string) {
+    setInfo((current) => ({ ...current, [field]: value }));
+  }
   const [error, setError] = useState("");
   // Equipos sin libero marcado al tocar "Siguiente" (pedido explicito
   // 26/10/2026: avisar antes de seguir, con modal propio).
@@ -162,7 +175,7 @@ export function SetupScreen({ match, onContinue }: Props) {
     }
     saveRemembered(memory);
     setError("");
-    onContinue({ ...match, teams: { A: teamA, B: teamB }, setsToWin: 2, category: { sex, division }, firstServeSet1: firstServe, phase: "lineup" });
+    onContinue({ ...match, info, teams: { A: teamA, B: teamB }, setsToWin: 2, category: { sex, division }, firstServeSet1: firstServe, phase: "lineup" });
   }
 
   const roster = rosters[editing];
@@ -329,6 +342,48 @@ export function SetupScreen({ match, onContinue }: Props) {
           </div>
         </div>
       )}
+
+      <details className="pl-card pl-info">
+        <summary>Datos del partido (opcional)</summary>
+        <div className="pl-info-grid">
+          <label className="pl-field">
+            <span>Fecha</span>
+            <input type="date" value={info.date} onChange={(event) => setInfoField("date", event.target.value)} />
+          </label>
+          <label className="pl-field">
+            <span>Hora</span>
+            <input type="time" value={info.time} onChange={(event) => setInfoField("time", event.target.value)} />
+          </label>
+          <label className="pl-field pl-info-wide">
+            <span>Lugar</span>
+            <input value={info.place} onChange={(event) => setInfoField("place", event.target.value)} maxLength={80} />
+          </label>
+          <label className="pl-field">
+            <span>Árbitro 1</span>
+            <input value={info.referee1} onChange={(event) => setInfoField("referee1", event.target.value)} maxLength={60} />
+          </label>
+          <label className="pl-field">
+            <span>Árbitro 2</span>
+            <input value={info.referee2} onChange={(event) => setInfoField("referee2", event.target.value)} maxLength={60} />
+          </label>
+          <label className="pl-field pl-field--A">
+            <span>Capitán local</span>
+            <input value={info.captainA} onChange={(event) => setInfoField("captainA", event.target.value)} maxLength={60} />
+          </label>
+          <label className="pl-field pl-field--B">
+            <span>Capitán visitante</span>
+            <input value={info.captainB} onChange={(event) => setInfoField("captainB", event.target.value)} maxLength={60} />
+          </label>
+          <label className="pl-field pl-field--A">
+            <span>Entrenador local</span>
+            <input value={info.coachA} onChange={(event) => setInfoField("coachA", event.target.value)} maxLength={60} />
+          </label>
+          <label className="pl-field pl-field--B">
+            <span>Entrenador visitante</span>
+            <input value={info.coachB} onChange={(event) => setInfoField("coachB", event.target.value)} maxLength={60} />
+          </label>
+        </div>
+      </details>
 
       <button type="button" className="pl-button pl-button--primary pl-button--block" onClick={() => handleContinue()}>
         Siguiente: formación del set 1

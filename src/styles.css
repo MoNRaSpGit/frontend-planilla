@@ -1060,3 +1060,119 @@ button:disabled {
   margin-top: 4px;
   font-size: 0.8rem;
 }
+
+/* ---------- volver atras desde la planilla (11/11/2026) ---------- */
+
+.pl-log li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pl-log-text {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+.pl-rewind {
+  margin-left: auto;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pl-rewind-confirm {
+  display: grid;
+  gap: 10px;
+}
+
+.pl-rewind-confirm p {
+  margin: 0;
+}
+
+/* ---------- sanciones, cambio de cancha, datos del partido (11/11/2026) ---------- */
+
+.pl-back-button {
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  min-width: 58px;
+  padding: 4px 10px;
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  line-height: 1;
+}
+
+.pl-back-button span {
+  font-size: 1.7rem;
+  font-weight: 800;
+}
+
+.pl-back-button small {
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.pl-match-links {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  margin-top: 8px;
+}
+
+.pl-set-time {
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.pl-log li.is-sanction {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.pl-log li.is-court_change {
+  font-weight: 800;
+}
+
+.pl-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  resize: vertical;
+}
+
+.pl-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.pl-sanction-list {
+  display: grid;
+  gap: 8px;
+}
+
+.pl-info summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.pl-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.pl-info-wide {
+  grid-column: 1 / -1;
+}

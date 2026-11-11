@@ -81,7 +81,8 @@ export function startSet(match: Match, lineups: Record<Side, Rotation>, firstSer
     firstServe,
     startingLineups: { A: [...lineups.A], B: [...lineups.B] },
     teams: { A: emptyTeam(lineups.A), B: emptyTeam(lineups.B) },
-    winner: null
+    winner: null,
+    startedAt: new Date().toISOString()
   };
   const next: Match = { ...match, sets: [...match.sets, set], phase: "playing" };
   return addLog(next, "set_start", null, `Empieza el set ${number} · saca ${teamName(match, firstServe)} (#${lineups[firstServe][0]})`);
@@ -128,7 +129,7 @@ export function scorePoint(match: Match, side: Side): Match {
   // Fin de set: llegar a 25 (15 el decisivo) con 2 de diferencia.
   const target = setTarget(match, set.number);
   if (score[side] >= target && score[side] - score[other(side)] >= 2) {
-    nextSet = { ...nextSet, winner: side };
+    nextSet = { ...nextSet, winner: side, endedAt: new Date().toISOString() };
     const setsWon = { ...next.setsWon, [side]: next.setsWon[side] + 1 };
     const finished = setsWon[side] >= match.setsToWin;
     next = { ...replaceSet(next, nextSet), setsWon, phase: finished ? "finished" : "set_over" };
@@ -180,6 +181,67 @@ export function substitute(match: Match, side: Side, outNumber: number, inNumber
   const nextTeam: TeamSetState = { ...team, rotation, subs, subsUsed: team.subsUsed + 1 };
   const next = replaceSet(match, { ...set, teams: { ...set.teams, [side]: nextTeam } });
   return addLog(next, "sub", side, `Cambio ${teamName(match, side)}: sale #${outNumber}, entra #${inNumber} (${nextTeam.subsUsed}/6)`);
+}
+
+// Cambio excepcional (lesion): no cuenta entre los 6 y puede entrar
+// cualquier jugador que no este en cancha (menos el libero). Pedido
+// 11/11/2026.
+export function exceptionalSubstitute(match: Match, side: Side, outNumber: number, inNumber: number): Match {
+  const set = currentSet(match);
+  if (!set || match.phase !== "playing") return match;
+  const team = set.teams[side];
+  const info = match.teams[side];
+  if (!team.rotation.includes(outNumber) || team.liberoOn?.replaced === outNumber) return match;
+  if (team.rotation.includes(inNumber) || info.liberos.includes(inNumber)) return match;
+  const rotation = team.rotation.map((number) => (number === outNumber ? inNumber : number));
+  const next = replaceSet(match, { ...set, teams: { ...set.teams, [side]: { ...team, rotation } } });
+  return addLog(next, "sub", side, `Cambio excepcional (lesión) ${teamName(match, side)}: sale #${outNumber}, entra #${inNumber} (no cuenta)`);
+}
+
+export type SanctionLevel = "warning" | "penalty" | "expulsion" | "disqualification";
+
+export const SANCTION_LABELS: Record<SanctionLevel, string> = {
+  warning: "Amarilla (amonestación)",
+  penalty: "Roja (penalización: punto al rival)",
+  expulsion: "Expulsión",
+  disqualification: "Descalificación"
+};
+
+// Sancion a un equipo o a un jugador (number null = equipo / entrenador).
+// Solo la penalizacion suma un tanto al rival; en expulsion y
+// descalificacion queda anotado y el equipo debe reemplazar al jugador.
+export function sanction(match: Match, side: Side, level: SanctionLevel, number: number | null): Match {
+  const set = currentSet(match);
+  if (!set || match.phase !== "playing") return match;
+  const who = number === null ? "equipo / entrenador" : `#${number}`;
+  const rival = other(side);
+  const effect =
+    level === "penalty" ? ` · punto para ${teamName(match, rival)}` : level === "warning" ? "" : " · debe ser reemplazado";
+  const label = level === "warning" ? "amarilla" : level === "penalty" ? "roja" : level === "expulsion" ? "expulsión" : "descalificación";
+  const logged = addLog(match, "sanction", side, `Sanción ${teamName(match, side)} (${who}): ${label}${effect}`);
+  return level === "penalty" ? scorePoint(logged, rival) : logged;
+}
+
+// Cambio de cancha del set decisivo: al llegar un equipo a 8.
+export function needsCourtChange(match: Match): boolean {
+  const set = currentSet(match);
+  if (!set || match.phase !== "playing") return false;
+  return set.number === decidingSetNumber(match) && !set.courtChanged && Math.max(set.score.A, set.score.B) >= 8;
+}
+
+export function markCourtChange(match: Match): Match {
+  const set = currentSet(match);
+  if (!set) return match;
+  const next = replaceSet(match, { ...set, courtChanged: true });
+  return addLog(next, "court_change", null, "Cambio de cancha (8 puntos)");
+}
+
+// Entre sets los equipos cambian de lado: en los sets pares A pasa a la
+// derecha; en el decisivo se vuelve a cambiar al llegar a 8.
+export function sidesSwapped(match: Match): boolean {
+  const set = currentSet(match);
+  if (!set) return false;
+  return (set.number % 2 === 0) !== Boolean(set.courtChanged);
 }
 
 // Donde puede entrar el libero: un jugador de atras (I, V, VI). En I no

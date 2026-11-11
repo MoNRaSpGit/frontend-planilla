@@ -27,7 +27,7 @@ export function App() {
   useEffect(() => {
     const signature = matchSignature(match);
     if (!signature || league.lastSignature === signature) return;
-    const result = resultFromMatch(match, league.nextId);
+    const result = resultFromMatch(match, league.nextId, signature);
     if (!result) return;
     setLeague({ ...league, results: [...league.results, result], nextId: league.nextId + 1, lastSignature: signature });
   }, [match, league, setLeague]);
