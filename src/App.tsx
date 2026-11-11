@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { loadLeague, matchSignature, resultFromMatch, saveLeague, type LeagueData } from "./liga/league";
+import { TablaScreen } from "./liga/TablaScreen";
 import { LineupScreen } from "./planilla/LineupScreen";
 import { MatchScreen } from "./planilla/MatchScreen";
 import { newMatch } from "./planilla/rules";
@@ -12,6 +14,23 @@ import type { Match } from "./planilla/types";
 export function App() {
   const [state, setState] = useState(() => loadSaved() ?? { match: newMatch(), history: [] as Match[] });
   const { match, history } = state;
+  const [view, setView] = useState<"planilla" | "tabla">("planilla");
+  const [league, setLeagueState] = useState<LeagueData>(() => loadLeague() ?? { results: [], nextId: 1 });
+
+  const setLeague = useCallback((next: LeagueData) => {
+    setLeagueState(next);
+    saveLeague(next);
+  }, []);
+
+  // Partido terminado en la planilla (con cuadros del catalogo): se anota
+  // solo en la tabla, una vez.
+  useEffect(() => {
+    const signature = matchSignature(match);
+    if (!signature || league.lastSignature === signature) return;
+    const result = resultFromMatch(match, league.nextId);
+    if (!result) return;
+    setLeague({ ...league, results: [...league.results, result], nextId: league.nextId + 1, lastSignature: signature });
+  }, [match, league, setLeague]);
 
   useEffect(() => {
     save(state);
@@ -37,6 +56,7 @@ export function App() {
     setState({ match: newMatch(), history: [] });
   }
 
+  function renderPlanilla() {
   if (match.phase === "setup") {
     return <SetupScreen match={match} onContinue={change} />;
   }
@@ -60,6 +80,30 @@ export function App() {
       onUndo={undo}
       onNextSet={() => change({ ...match, phase: "lineup" })}
       onNewMatch={resetMatch}
+      onViewTable={() => setView("tabla")}
     />
+  );
+  }
+
+  // La barra de abajo se esconde mientras se juega (la cancha ocupa todo);
+  // al terminar el partido se llega a la tabla desde el cartel final.
+  const inMatch = match.phase === "playing" || match.phase === "set_over" || match.phase === "finished";
+  const showTabBar = view === "tabla" || !inMatch;
+
+  return (
+    <>
+      <div hidden={view !== "planilla"}>{renderPlanilla()}</div>
+      {view === "tabla" && <TablaScreen league={league} onChange={setLeague} />}
+      {showTabBar && (
+        <nav className="lg-tabbar" aria-label="Secciones">
+          <button type="button" className={view === "planilla" ? "is-active" : ""} onClick={() => setView("planilla")}>
+            Planilla
+          </button>
+          <button type="button" className={view === "tabla" ? "is-active" : ""} onClick={() => setView("tabla")}>
+            Tabla
+          </button>
+        </nav>
+      )}
+    </>
   );
 }

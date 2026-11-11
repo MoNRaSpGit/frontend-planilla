@@ -863,3 +863,200 @@ button:disabled {
   height: 100%;
   object-fit: contain;
 }
+
+/* ---------- liga: pestaña Tabla (11/11/2026) ---------- */
+
+.lg-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.lg-tabbar button {
+  min-height: 52px;
+  border: none;
+  background: none;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.lg-tabbar button.is-active {
+  color: var(--team-a);
+  box-shadow: inset 0 3px 0 var(--team-a);
+}
+
+/* Deja lugar para la barra de abajo en las pantallas de datos y tabla. */
+.pl-screen {
+  padding-bottom: 88px;
+}
+
+.lg-table-wrap {
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.lg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-table th,
+.lg-table td {
+  padding: 10px 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.lg-table th {
+  font-size: 0.72rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.lg-table tbody tr {
+  cursor: pointer;
+  border-top: 1px solid var(--border);
+}
+
+.lg-table tbody tr:first-child {
+  border-top: none;
+}
+
+.lg-table tbody tr:active {
+  background: var(--team-a-soft);
+}
+
+.lg-table .lg-left {
+  text-align: left;
+}
+
+.lg-team {
+  font-weight: 700;
+  white-space: normal;
+}
+
+.lg-pts {
+  font-weight: 800;
+}
+
+.lg-table tbody tr:nth-child(-n + 3) td:first-child {
+  color: var(--team-a);
+  font-weight: 800;
+}
+
+.lg-note {
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.lg-demo {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
+.lg-demo p {
+  margin: 0;
+}
+
+.lg-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.lg-stat {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.lg-stat span {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.lg-stat strong {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.lg-stat--main {
+  border-color: var(--team-a);
+  background: var(--team-a-soft);
+}
+
+.lg-heading {
+  margin: 6px 0 0;
+  font-size: 1.05rem;
+}
+
+.lg-matches {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.lg-match {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--border);
+  border-radius: 12px;
+}
+
+.lg-match.is-won {
+  border-left-color: #16a34a;
+}
+
+.lg-match.is-lost {
+  border-left-color: var(--danger);
+}
+
+.lg-match-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lg-tag {
+  align-self: center;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.lg-tag--real {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.lg-remove {
+  margin-top: 4px;
+  font-size: 0.8rem;
+}

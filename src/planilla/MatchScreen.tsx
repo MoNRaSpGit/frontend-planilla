@@ -22,6 +22,8 @@ type Props = {
   onUndo: () => void;
   onNextSet: () => void;
   onNewMatch: () => void;
+  // Lleva a la pestaña Tabla (desde el cartel de partido terminado).
+  onViewTable?: () => void;
 };
 
 type Dialog =
@@ -37,7 +39,7 @@ type Dialog =
 // de cada lado, cada uno con su marcador, su cancha (quien saca) y los
 // botones Punto / Cambio / Libero / Tiempo. El planillero solo anota los
 // tantos; saque y rotacion los calcula rules.ts.
-export function MatchScreen({ match, canUndo, onChange, onUndo, onNextSet, onNewMatch }: Props) {
+export function MatchScreen({ match, canUndo, onChange, onUndo, onNextSet, onNewMatch, onViewTable }: Props) {
   const [dialog, setDialog] = useState<Dialog>(null);
   // Sets en los que ya se aviso lo del libero (una sola vez por set).
   const [liberoWarnedSets, setLiberoWarnedSets] = useState<number[]>([]);
@@ -133,9 +135,14 @@ export function MatchScreen({ match, canUndo, onChange, onUndo, onNextSet, onNew
               )}
             </div>
             {finished && (
-              <button type="button" className="pl-link" onClick={() => setDialog({ kind: "new" })}>
-                Nuevo partido
-              </button>
+              <>
+                <button type="button" className="pl-button" onClick={onViewTable}>
+                  Ver tabla
+                </button>
+                <button type="button" className="pl-link" onClick={() => setDialog({ kind: "new" })}>
+                  Nuevo partido
+                </button>
+              </>
             )}
           </div>
         </div>
