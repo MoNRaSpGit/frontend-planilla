@@ -1176,3 +1176,10 @@ button:disabled {
 .pl-info-wide {
   grid-column: 1 / -1;
 }
+
+/* Aviso del carné del deportista (13/11/2026): solo alerta, no bloquea. */
+.pl-player-list li.carnet-expired { background: #fef2f2; border-left: 4px solid #dc2626; }
+.pl-player-list li.carnet-soon { background: #fefce8; border-left: 4px solid #eab308; }
+.pl-carnet-label { display: block; font-size: 0.75rem; font-weight: 700; }
+.carnet-expired .pl-carnet-label { color: #b91c1c; }
+.carnet-soon .pl-carnet-label { color: #a16207; }

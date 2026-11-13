@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getCatalogCached, playerFullName, saveRemembered } from "./catalog";
+import { carnetInfo, getCatalogCached, playerFullName, saveRemembered } from "./catalog";
 import { addReservePlayer } from "./rules";
 import type { Match, Side } from "./types";
 
@@ -17,14 +17,14 @@ export function ArrivalForm({ match, side, onAdd }: Props) {
   const info = match.teams[side];
   // La lista sale del cuadro en el servidor (sirve tambien para partidos
   // empezados antes de guardar reservas); sin conexion, las guardadas.
-  const [catalogReserves, setCatalogReserves] = useState<{ key: string; name: string }[] | null>(null);
+  const [catalogReserves, setCatalogReserves] = useState<{ key: string; name: string; expiryDate?: string | null }[] | null>(null);
   useEffect(() => {
     if (info.catalogTeamId == null) return;
     let cancelled = false;
     getCatalogCached()
       .then((teams) => {
         const team = teams.find((entry) => entry.id === info.catalogTeamId);
-        if (!cancelled && team) setCatalogReserves(team.players.map((player) => ({ key: `c${player.id}`, name: playerFullName(player) })));
+        if (!cancelled && team) setCatalogReserves(team.players.map((player) => ({ key: `c${player.id}`, name: playerFullName(player), expiryDate: player.expiryDate })));
       })
       .catch(() => undefined);
     return () => {
@@ -67,6 +67,10 @@ export function ArrivalForm({ match, side, onAdd }: Props) {
           {reserves.map((reserve) => (
             <option key={reserve.key} value={reserve.key}>
               {reserve.name}
+              {(() => {
+                const carnet = carnetInfo((reserve as { expiryDate?: string | null }).expiryDate);
+                return carnet && carnet.status !== "ok" ? (carnet.status === "expired" ? " 🔴 " : " 🟡 ") + carnet.label : "";
+              })()}
             </option>
           ))}
         </select>

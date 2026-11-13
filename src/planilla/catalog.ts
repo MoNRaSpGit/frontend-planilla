@@ -3,7 +3,7 @@ import { API_BASE_URL } from "../shared/api";
 // Cuadros y jugadores copiados de juez (backend: GET /planilla/catalog).
 export type CatalogSex = "masculino" | "femenino";
 export type CatalogDivision = "A" | "B";
-export type CatalogPlayer = { id: number; firstName: string; lastName: string };
+export type CatalogPlayer = { id: number; firstName: string; lastName: string; expiryDate?: string | null };
 export type CatalogTeam = { id: number; name: string; division: CatalogDivision; sex: CatalogSex; players: CatalogPlayer[] };
 
 export async function fetchCatalog(): Promise<CatalogTeam[]> {
@@ -23,6 +23,24 @@ export function getCatalogCached(): Promise<CatalogTeam[]> {
     });
   }
   return catalogPromise;
+}
+
+// Aviso del carne del deportista (13/11/2026): rojo = vencido, amarillo =
+// vence en 30 dias o menos. Es solo una alerta: nunca bloquea nada.
+export type CarnetStatus = "expired" | "soon" | "ok";
+export type CarnetInfo = { status: CarnetStatus; label: string };
+
+export function carnetInfo(expiryDate: string | null | undefined): CarnetInfo | null {
+  if (!expiryDate) return null;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const [year, month, day] = expiryDate.split("-").map(Number);
+  const expiry = new Date(year, month - 1, day).getTime();
+  const shown = String(day).padStart(2, "0") + "/" + String(month).padStart(2, "0") + "/" + year;
+  const days = Math.round((expiry - today) / 86400000);
+  if (days < 0) return { status: "expired", label: "Carné vencido el " + shown };
+  if (days <= 30) return { status: "soon", label: days === 0 ? "Carné vence hoy" : "Carné vence el " + shown };
+  return { status: "ok", label: "" };
 }
 
 export function playerFullName(player: CatalogPlayer) {

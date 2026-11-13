@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   fetchCatalog,
   loadRemembered,
+  carnetInfo,
   playerFullName,
   saveRemembered,
   type CatalogDivision,
@@ -25,7 +26,7 @@ type Props = {
 
 // Un jugador en la lista de un cuadro: los del catalogo traen key "c<id>"
 // (asi se recuerda su numero), los agregados a mano "m<n>".
-type RosterPlayer = { key: string; name: string; numberInput: string; libero: boolean };
+type RosterPlayer = { key: string; name: string; numberInput: string; libero: boolean; expiryDate?: string | null };
 type Roster = { catalogTeamId: number | null; name: string; players: RosterPlayer[] };
 
 const SIDE_LABELS: Record<Side, string> = { A: "Local", B: "Visitante" };
@@ -37,7 +38,7 @@ function rosterFromCatalog(team: CatalogTeam, remembered: Record<string, Remembe
     players: team.players.map((player) => {
       const key = `c${player.id}`;
       const memory = remembered[key];
-      return { key, name: playerFullName(player), numberInput: memory?.number != null ? String(memory.number) : "", libero: memory?.libero ?? false };
+      return { key, name: playerFullName(player), numberInput: memory?.number != null ? String(memory.number) : "", libero: memory?.libero ?? false, expiryDate: player.expiryDate };
     })
   };
 }
@@ -278,8 +279,11 @@ export function SetupScreen({ match, onContinue }: Props) {
                 <p className="pl-muted">Poné el número de camiseta de los que juegan. Sin número = no juega.</p>
               )}
               <ul className="pl-player-list">
-                {roster.players.map((player) => (
-                  <li key={player.key} className={`${player.libero ? "is-libero" : ""} ${player.numberInput === "" ? "is-out" : ""}`}>
+                {roster.players.map((player) => {
+                  const carnet = carnetInfo(player.expiryDate);
+                  const carnetClass = carnet && carnet.status !== "ok" ? " carnet-" + carnet.status : "";
+                  return (
+                  <li key={player.key} className={`${player.libero ? "is-libero" : ""} ${player.numberInput === "" ? "is-out" : ""}${carnetClass}`}>
                     <input
                       className="pl-input-number"
                       value={player.numberInput}
@@ -288,7 +292,10 @@ export function SetupScreen({ match, onContinue }: Props) {
                       placeholder="N.º"
                       aria-label={`Número de ${player.name}`}
                     />
-                    <span className="pl-player-name">{player.name}</span>
+                    <span className="pl-player-name">
+                      {player.name}
+                      {carnet && carnet.status !== "ok" ? <small className="pl-carnet-label">{carnet.label}</small> : null}
+                    </span>
                     <button
                       type="button"
                       className={`pl-chip ${player.libero ? "is-on" : ""}`}
@@ -297,7 +304,8 @@ export function SetupScreen({ match, onContinue }: Props) {
                       Líbero
                     </button>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
 
             </>
